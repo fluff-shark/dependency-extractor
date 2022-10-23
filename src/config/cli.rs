@@ -4,9 +4,10 @@ use clap::Parser;
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 pub struct Args {
-   /// Glob pattern of files which should be analyzed
+   /// Path to the project root. The filse glob will be evaluated
+   /// in the context of this path.
    #[arg(short, long)]
-   pub files: Option<String>,
+   pub base_path: Option<String>,
 }
 
 pub fn parse_cli_options() -> Args {
