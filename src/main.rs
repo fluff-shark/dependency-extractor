@@ -1,8 +1,7 @@
 mod config;
-mod files;
+mod extractor;
 
 fn main() {
     let config = config::parse_config();
-    let files = files::find_ts_filenames(config.base_path);
-    dbg!(files);
+    extractor::extract_dependndencies(config.base_path.as_path());
 }

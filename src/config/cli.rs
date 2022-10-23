@@ -1,4 +1,5 @@
 use clap::Parser;
+use std::path::PathBuf;
 
 /// Simple program to greet a person
 #[derive(Parser, Debug)]
@@ -7,7 +8,7 @@ pub struct Args {
    /// Path to the project root. The filse glob will be evaluated
    /// in the context of this path.
    #[arg(short, long)]
-   pub base_path: Option<String>,
+   pub base_path: Option<PathBuf>,
 }
 
 pub fn parse_cli_options() -> Args {
