@@ -1,4 +1,4 @@
-use std::{path::{Path,PathBuf}, fs};
+use std::{path::{Path,PathBuf,StripPrefixError}, fs};
 use globwalk::GlobWalkerBuilder;
 
 const WORKSPACE_FOLDER: &str = ".dependencies";
@@ -9,7 +9,7 @@ pub fn clear_workspace(base_path: &Path) -> PathBuf {
     let workspace = base_path.join(WORKSPACE_FOLDER);
     let workspace_path = workspace.as_path();
     println!("Removing {}", workspace_path.display());
-    fs::remove_dir_all(workspace_path); // errors are ok here... directory may not exist.
+    _ = fs::remove_dir_all(workspace_path); // errors are ok here... the directory may not exist.
     return workspace;
 }
 
@@ -18,22 +18,22 @@ pub struct FileToProcess {
     pub output_file: PathBuf,
 }
 
-pub fn get_files_to_process(base_path: &Path, workspace: &Path) -> Vec<FileToProcess> {
-    return find_files_to_process(base_path).iter().map(|input_file| FileToProcess {
-        input_file: input_file.to_owned(),
-        output_file: get_dependency_file_name(base_path, workspace, input_file),
+pub fn get_files_to_process(base_path: &Path, workspace: &Path) -> Vec<Result<FileToProcess, StripPrefixError>> {
+    return find_files_to_process(base_path).iter().map(|input_file| -> Result<FileToProcess, StripPrefixError> {
+        let output_file = get_dependency_file_name(base_path, workspace, input_file)?;
+        return Ok(FileToProcess{
+            input_file: input_file.to_owned(),
+            output_file: output_file,
+        })
     }).collect();
 }
 
 
 // Get the name of the file where we should log the dependency info.
-fn get_dependency_file_name(base_path: &Path, workspace: &Path, input_file: &Path) -> PathBuf {
-    let dependency_file_name = match input_file.strip_prefix(base_path) {
-        Ok(file) => file,
-        Err(e) => panic!("Error removing prefix {} from file {}: {}", base_path.display(), input_file.display(), e),
-    };
+fn get_dependency_file_name(base_path: &Path, workspace: &Path, input_file: &Path) -> Result<PathBuf, StripPrefixError> {
+    let dependency_file_name = input_file.strip_prefix(base_path)?;
     println!("logging {} to {}", input_file.display(), workspace.join(dependency_file_name).display());
-    return workspace.join(dependency_file_name);
+    return Ok(workspace.join(dependency_file_name));
 }
 
 fn find_files_to_process(base_path: &Path) -> Vec<PathBuf> {
