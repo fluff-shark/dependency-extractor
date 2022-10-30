@@ -8,8 +8,8 @@ const WORKSPACE_FOLDER: &str = ".dependencies";
 pub fn clear_workspace(base_path: &Path) -> PathBuf {
     let workspace = base_path.join(WORKSPACE_FOLDER);
     let workspace_path = workspace.as_path();
-    println!("Removing {}", workspace_path.display());
-    _ = fs::remove_dir_all(workspace_path); // errors are ok here... the directory may not exist.
+     // errors are ok here... the directory may not exist.
+    _ = fs::remove_dir_all(workspace_path);
     return workspace;
 }
 
@@ -31,8 +31,7 @@ pub fn get_files_to_process(base_path: &Path, workspace: &Path) -> Vec<Result<Fi
 
 // Get the name of the file where we should log the dependency info.
 fn get_dependency_file_name(base_path: &Path, workspace: &Path, input_file: &Path) -> Result<PathBuf, StripPrefixError> {
-    let dependency_file_name = input_file.strip_prefix(base_path)?;
-    println!("logging {} to {}", input_file.display(), workspace.join(dependency_file_name).display());
+    let dependency_file_name = input_file.strip_prefix(base_path)?.with_extension("yaml");
     return Ok(workspace.join(dependency_file_name));
 }
 
