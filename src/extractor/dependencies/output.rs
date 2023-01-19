@@ -22,8 +22,6 @@ pub fn extract_dependencies(base_path: &Path, input_path: &Path, module: Module)
         module_imports: Vec::new(),
     };
     module.visit_with(&mut extractor);
-
-    // TODO: Implement this next.
     return Dependencies {
         local_files: extractor.local_imports,
         modules: extractor.module_imports,
@@ -50,7 +48,8 @@ impl Visit for ImportExtractor {
             match with_extension {
                 Some(file) => {
                     let relative_path = PathBuf::from(".").join(diff_paths(file.to_owned(), self.base_path.to_owned()).unwrap());
-                    self.local_imports.push(relative_path)
+                    let path_with_normalized_separator = relative_path.display().to_string().replace(MAIN_SEPARATOR, "/");
+                    self.local_imports.push(PathBuf::from(path_with_normalized_separator));
                 },
                 None => eprintln!("ERROR: Couldn't resolve import {:?} from {:?}. Does this file exist?", import, self.file_directory),
             };

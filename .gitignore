@@ -1,1 +1,5 @@
+# Build output
 /target
+
+# Transient test files
+/tests/cases/*/project/.dependencies/*

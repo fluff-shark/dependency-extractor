@@ -31,7 +31,9 @@ pub fn get_files_to_process(base_path: &Path, workspace: &Path) -> Vec<Result<Fi
 
 // Get the name of the file where we should log the dependency info.
 fn get_dependency_file_name(base_path: &Path, workspace: &Path, input_file: &Path) -> Result<PathBuf, StripPrefixError> {
-    let dependency_file_name = input_file.strip_prefix(base_path)?.with_extension("yaml");
+    let old_extension = input_file.extension().unwrap().to_str().unwrap();
+    let new_extension = format!("{}.yaml", old_extension);
+    let dependency_file_name = input_file.strip_prefix(base_path)?.with_extension(new_extension);
     return Ok(workspace.join(dependency_file_name));
 }
 

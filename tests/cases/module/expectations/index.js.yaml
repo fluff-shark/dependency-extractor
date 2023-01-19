@@ -1,0 +1,5 @@
+local_files:
+- ./a/print.js
+- ./b/print-list.js
+modules:
+- node:buffer
