@@ -3,5 +3,8 @@ mod extractor;
 
 fn main() {
     let config = config::parse_config();
-    extractor::extract_dependndencies(config.base_path.as_path());
+    match config.base_path.canonicalize() {
+        Ok(path) => extractor::extract_dependndencies(path),
+        Err(e) => panic!("Invalid path: {}", e),
+    }
 }

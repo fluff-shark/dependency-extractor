@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 clap = { version = "4.0.18", features = ["derive"] }
 globwalk = "0.8.1"
+pathdiff = "0.2.1"
 serde = { version = "1.0.147", features = ["derive"] }
 serde_yaml = "0.9.14"
 swc_common = { version = "0.29.13", features = ["tty-emitter"] }
