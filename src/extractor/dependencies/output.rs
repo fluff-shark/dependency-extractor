@@ -47,11 +47,17 @@ impl Visit for ImportExtractor {
             let with_extension = find_file(imported_path);
             match with_extension {
                 Some(file) => {
-                    let relative_path = PathBuf::from(".").join(diff_paths(file.to_owned(), self.base_path.to_owned()).unwrap());
-                    let path_with_normalized_separator = relative_path.display().to_string().replace(MAIN_SEPARATOR, "/");
+                    let relative_path = PathBuf::from(".")
+                        .join(diff_paths(file.to_owned(), self.base_path.to_owned()).unwrap());
+                    let path_with_normalized_separator =
+                        relative_path.display().to_string().replace(MAIN_SEPARATOR, "/");
                     self.local_imports.push(PathBuf::from(path_with_normalized_separator));
                 },
-                None => eprintln!("ERROR: Couldn't resolve import {:?} from {:?}. Does this file exist?", import, self.file_directory),
+                None => eprintln!(
+                    "ERROR: Couldn't resolve import {:?} from {:?}. Does this file exist?",
+                    import,
+                    self.file_directory
+                ),
             };
         } else {
           self.module_imports.push(import)
@@ -86,23 +92,13 @@ fn find_file(path: PathBuf) -> Option<PathBuf> {
     None
 }
 
-pub fn write_dependencies(base_path: &Path, input: &Path, output_path: &Path, module: Module) {
+pub fn write_dependencies(base_path: &Path, input: &Path, output_path: &Path, module: Module)
+    -> Result<(), Box<dyn std::error::Error>>
+{
     let dependencies = extract_dependencies(base_path, input, module);
     let parent_directory = output_path.parent().unwrap();
-    match create_dir_all(parent_directory) {
-        Ok(_) => (),
-        Err(e) => panic!("Failed to create output directory: {:?}", e)
-    };
-    let file = match File::create(output_path) {
-        Ok(file) => file,
-        Err(e) => {
-            eprintln!("error creating file: {:?}", e);
-            return;
-        }
-    };
-
-    match serde_yaml::to_writer(file, &dependencies) {
-        Ok(_) => (),
-        Err(e) => panic!("Failed to serialize {:?} to file {:?}: {:?}", dependencies, output_path, e)
-    };
+    create_dir_all(parent_directory)?;
+    let file = File::create(output_path)?;
+    serde_yaml::to_writer(file, &dependencies)?;
+    return Ok(());
 }

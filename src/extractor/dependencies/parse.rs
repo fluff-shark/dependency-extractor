@@ -4,11 +4,15 @@ use swc_common::{errors::{ColorConfig, Handler},SourceMap};
 use swc_ecma_visit::swc_ecma_ast::{EsVersion,Module};
 use swc_ecma_parser::{EsConfig,lexer::Lexer, Parser, StringInput, Syntax,TsConfig};
 
-pub fn parse_module(input: &Path) -> std::result::Result<Module, ModuleParseError> {
+// TODO: This doesn't bubble errors into the return value properly.
+pub fn parse_module(input: &Path) -> Result<Module, Box<dyn std::error::Error>> {
     let cm: Lrc<SourceMap> = Default::default();
-    let handler =
-        Handler::with_tty_emitter(ColorConfig::Auto, true, false,
-        Some(cm.clone()));
+    let handler = Handler::with_tty_emitter(
+        ColorConfig::Auto,
+        true,
+        false,
+        Some(cm.clone())
+    );
     let source_file = cm.load_file(input)?;
     let syntax = if input.ends_with(".ts") || input.ends_with(".tsx") {
         let config: TsConfig = Default::default();
@@ -47,12 +51,8 @@ pub fn parse_module(input: &Path) -> std::result::Result<Module, ModuleParseErro
 
     let parsed = parser
         .parse_module()
-        .map_err(|e| {
-            eprintln!("Error parsing: {}", input.display());
-            e.into_diagnostic(&handler).emit();
-            return ModuleParseError{io_error: None};
-        })?;
-     return Ok(parsed);
+        .expect("failed to parse module");
+    return Ok(parsed);
 }
 
 pub struct ModuleParseError {

@@ -1,4 +1,4 @@
-use std::{path::{Path,PathBuf,StripPrefixError}, fs};
+use std::{path::{Path,PathBuf}, fs};
 use globwalk::GlobWalkerBuilder;
 
 const WORKSPACE_FOLDER: &str = ".dependencies";
@@ -18,8 +18,9 @@ pub struct FileToProcess {
     pub output_file: PathBuf,
 }
 
-pub fn get_files_to_process(base_path: &Path, workspace: &Path) -> Vec<Result<FileToProcess, StripPrefixError>> {
-    return find_files_to_process(base_path).iter().map(|input_file| -> Result<FileToProcess, StripPrefixError> {
+pub fn get_files_to_process(base_path: &Path, workspace: &Path) -> Result<Vec<FileToProcess>, Box<dyn std::error::Error>> {
+    let files_to_process = find_files_to_process(base_path)?;
+    return files_to_process.iter().map(|input_file| -> Result<FileToProcess, Box<dyn std::error::Error>> {
         let output_file = get_dependency_file_name(base_path, workspace, input_file)?;
         return Ok(FileToProcess{
             input_file: input_file.to_owned(),
@@ -30,21 +31,20 @@ pub fn get_files_to_process(base_path: &Path, workspace: &Path) -> Vec<Result<Fi
 
 
 // Get the name of the file where we should log the dependency info.
-fn get_dependency_file_name(base_path: &Path, workspace: &Path, input_file: &Path) -> Result<PathBuf, StripPrefixError> {
+fn get_dependency_file_name(base_path: &Path, workspace: &Path, input_file: &Path)
+    -> Result<PathBuf, Box<dyn std::error::Error>>
+{
     let old_extension = input_file.extension().unwrap().to_str().unwrap();
     let new_extension = format!("{}.yaml", old_extension);
     let dependency_file_name = input_file.strip_prefix(base_path)?.with_extension(new_extension);
     return Ok(workspace.join(dependency_file_name));
 }
 
-fn find_files_to_process(base_path: &Path) -> Vec<PathBuf> {
-    let walker = match GlobWalkerBuilder::from_patterns(&base_path, &["**/*.{js,jsx,ts,tsx}"]).build() {
-        Ok(the_walker) => the_walker,
-        Err(e) => panic!("Glob error: {}", e),
-    };
-
-    return walker.map(|m| match m {
-        Ok(dir_entry) => dir_entry.into_path(),
-        Err(e) => panic!("Error searching {}: {}", base_path.display(), e),
+fn find_files_to_process(base_path: &Path) -> Result<Vec<PathBuf>, Box<dyn std::error::Error>> {
+    let walker =
+        GlobWalkerBuilder::from_patterns(&base_path, &["**/*.{js,jsx,ts,tsx}"]).build()?;
+    return walker.map(|maybe_dir_entry| -> Result<PathBuf, Box<dyn std::error::Error>> {
+        let dir_entry = maybe_dir_entry?;
+        return Ok(dir_entry.into_path());
     }).collect();
 }
