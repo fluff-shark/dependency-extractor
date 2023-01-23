@@ -36,14 +36,13 @@ this approach:
 
 Many ecosystems have graph visualizers. Some examples:
 
-- ([pydoit](https://pydoit.org/tutorial-1.html)
-- [import-graph-visualizer](https://github.com/rx-angular/import-graph-visualizer)
-- [goda](https://github.com/loov/goda)
+- (Python) [pydoit](https://pydoit.org/tutorial-1.html)
+- (Node) [import-graph-visualizer](https://github.com/rx-angular/import-graph-visualizer)
+- (Golang) [goda](https://github.com/loov/goda)
 
 Unfortunately these tools are monolithic: they parse the code _and_ draw the graph.
 
-Visualization software using `.yaml` files would work across input languages,
-making it significantly more reusable.
+A visualization tool using `.yaml` files be reusable regardless of the source language.
 
 ### Validating dependencies
 
@@ -61,7 +60,7 @@ calls a "complex" function is still complex code.
 By combining complexity metrics with the import graph, it *seems* to me like we can
 improve our metrics overall.
 
-Again, these `.yaml` files may contribute by working out import graph ahead of time. 
+Perhaps this tool could contribute to a solution by extracting that import graph. 
 
 ### Contributing
 
